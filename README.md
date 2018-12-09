@@ -31,7 +31,7 @@ The second difference was in how we estimated exposure. Due to technical constra
 
 We will not explain every single line of code, but will try to elaborate on comments in the code so that the experiments can be more easily reproduced. We are primarily concerned with the secretSharerExp.py file and its utility library, secretUtils.py. Other utility functions that were used during development but not in the actual tests are located in extraUtils.py.
 
-### Preamble
+### 0. Experimental setup
 
 After importing the necessary libraries and utility functions, we read hyperparameters from the command line.
 ```
@@ -42,3 +42,41 @@ numEpochs = int(sys.argv[4])
 batchSize = int(sys.argv[5])
 ```
 Let's examine these one at a time. We are trying to extract the secret `s[r]` from the model. `numTrueSecrets` simply determines how many instances of `s[r]` we insert into the training data. `numFalseSecrets` determines how many instances of `s[r']` we insert into the data, where `s[r']` is some random secret of the same format as `s[r]`. `numDistinctValues` determines the randomness space of the secrets. Since every secret in the script has length 2, `numDistinctValues` determines how many different values each entry of the secret can take on. The randomness space is thus `numDistinctValues ^ 2`. `numEpochs` and `batchSize` will be given as training parameters to the model later, and we will discuss them more at that time.
+
+The next block of code creates the secret according to hardcoded, but variable, specifications.
+```
+secretPref = "my locker combination is "
+seqLength = len(secretPref.split())
+gramSize = seqLength + 1
+
+secretText = generateSecret(secretLength, numDistinctValues)
+insertedSecret = secretPref + secretText
+```
+
+`gramSize` refers to the width of the **fixed-size windows** mentioned in the report, essentially the length of phrases the model reads in to make predictions off of. In this case, `gramSize` is 5, because we need the model to read the entire `secretPref` and produce a predicted value from it. The actual numeric value of the secret is computed randomly by the utility function `generateSecret()`.
+
+### 1. Read data
+
+The SMS messages are stored in XML format. Since XML is a nested markup language, we must traverse it like a tree to extract the right attributes.
+
+```
+root = ET.parse('smsCorpus_en_2015.03.09_all.xml').getroot()
+
+d = []
+for i in range(len(root)):
+    d.append({'id' : root[i].get('id'),
+              'text' : root[i][0].text})
+
+rootId = len(root)
+for i in range(numDistinctValues):
+    a = str(i)
+    d.append({'id' : rootId,
+              'text' : gramSize * (a + " ")})
+    rootId += 1
+
+dataRaw = pd.DataFrame(d)
+```
+
+`root` is a large, nested object containing the message data. We structure that data with python's xml package and its `ElementTree` method. We then create a blank list, iterate through every value of `root`'s `text` attribute, and add it to the list. We then add strings of numbers to the list to ensure that they will appear in the dictionary (for potential secret values) even if they are not in the corpus. Finally, the text objects are saved as a Pandas DataFrame.
+
+### 2. Clean data
