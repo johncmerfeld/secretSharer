@@ -24,6 +24,21 @@ ______________________________________________________________________
 
 ## Differences from Carlini paper
 Apart from different model architectures, there are two primary differences between this code and the procedure described by Carlini. One is the fixed-size versus stateful processing of the text. The main results of the Carilni paper used a recurrent neural network to process arbitrary-length text input, whereas this report used fixed-size partioning as its main strategy for turning the source text into data. This affected the way models could be attacked to extract secrets, because our model could only give predictions on certain tokens of input; a different-length secret and prefix necessitated an entirely different model.
+
 The second difference was in how we estimated exposure. Due to technical constraints, we focussed on relatively narrow randomness spaces so that entire secret phrases' probabilities could be enumerated over, whereas the Carlini paper developed efficient ways of searching over large randomness spaces to extract the secret one character at a time. We believe that despite our more limited methodology, our results offer meaningful insights and a validation of the original results.
 
 ## Code walkthrough
+
+We will not explain every single line of code, but will try to elaborate on comments in the code so that the experiments can be more easily reproduced. We are primarily concerned with the secretSharerExp.py file and its utility library, secretUtils.py. Other utility functions that were used during development but not in the actual tests are located in extraUtils.py.
+
+### Preamble
+
+After importing the necessary libraries and utility functions, we read hyperparameters from the command line.
+```
+numTrueSecrets = int(sys.argv[1])
+numFalseSecrets = int(sys.argv[2])
+numDistinctValues = int(sys.argv[3])
+numEpochs = int(sys.argv[4])
+batchSize = int(sys.argv[5])
+```
+Let's examine these one at a time. We are trying to extract the secret `s[r]` from the model. `numTrueSecrets` simply determines how many instances of `s[r]` we insert into the training data. `numFalseSecrets` determines how many instances of `s[r']` we insert into the data, where `s[r']` is some random secret of the same format as `s[r]`. `numDistinctValues` determines the randomness space of the secrets. Since every secret in the script has length 2, `numDistinctValues` determines how many different values each entry of the secret can take on. The randomness space is thus `numDistinctValues ^ 2`. `numEpochs` and `batchSize` will be given as training parameters to the model later, and we will discuss them more at that time.

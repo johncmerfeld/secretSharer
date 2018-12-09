@@ -11,22 +11,7 @@ from keras.layers import LSTM
 from keras.layers import Embedding
 
 from secretUtils import cleanSMS, dataSplit, labelSplit, generateSecret
-from secretUtils import comboString, enumerateSecrets, numericProbs
-
-# applied function to remove data entries containing words only seen once in
-#   the entire corpus
-def noSingleUseWords(tup):
-    for w in tup:
-        if w not in dct:
-            return False
-    return True
-
-# applied function to encode words from the corpus as unique numeric values
-def encodeText(tup):
-    code = [None] * len(tup)
-    for i in range(len(tup)):
-        code[i] = dct[tup[i]]  
-    return tuple(code)
+from secretUtils import enumerateSecrets, numericProbs
 
 # 0. EXPERIMENTAL SETUP ====================================
 
@@ -78,7 +63,7 @@ for i in range(len(root)):
 # 1.2 ADD NUMBERS TO THE VOCABULARY ------------------------
 rootId = len(root)
 for i in range(numDistinctValues):
-    a = comboString(i)
+    a = str(i)
     d.append({'id' : rootId,
               'text' : gramSize * (a + " ")})
     rootId += 1
@@ -198,6 +183,12 @@ for w in list(dct.keys()):
 dct = dctNoSingle
 
 # 3.3 REMOVE NGRAMS WITH SINGLE-USE WORDS FROM DATA --------
+def noSingleUseWords(tup):
+    for w in tup:
+        if w not in dct:
+            return False
+    return True
+
 dataGramsR = dataGramsR[dataGramsR['data'].apply(noSingleUseWords) == True]
 dataGramsT = dataGramsT[dataGramsT['data'].apply(noSingleUseWords) == True]
 dataGramsV = dataGramsV[dataGramsV['data'].apply(noSingleUseWords) == True]
@@ -205,6 +196,12 @@ dataGramsV = dataGramsV[dataGramsV['data'].apply(noSingleUseWords) == True]
 # 4. TRANSFORM DATA ========================================
 
 # 4.1 ENCODE DATA NUMERICALLY ------------------------------
+def encodeText(tup):
+    code = [None] * len(tup)
+    for i in range(len(tup)):
+        code[i] = dct[tup[i]]  
+    return tuple(code)
+
 dataGramsR['codes'] = dataGramsR['data'].apply(encodeText)
 dataGramsT['codes'] = dataGramsT['data'].apply(encodeText)
 dataGramsV['codes'] = dataGramsV['data'].apply(encodeText)

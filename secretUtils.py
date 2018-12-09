@@ -2,16 +2,6 @@ import numpy as np
 import re
 from random import randint
 
-def displayNumericResults(c, p, d, i):
-    result = np.zeros((c, 2), dtype = float)
-    for j in range(c):
-        a = comboString(j)
-            
-        result[j][0] = j
-        result[j][1] = p[i][d[a]]
-        
-    return (result[result[:, 1].argsort()])[::-1]
-
 def cleanSMS(sms):
     
     # leetspeak
@@ -277,43 +267,9 @@ def labelSplit(tup):
     n = len(tup)
     return tup[n - 1]
 
-def learnSecret():
-   
-    # for each digit d in s
-    #     for each number i in R
-    #         get Pr(model.predict('my locker combination is [i]'))
-    #     
-    
-    return None
-
 # get word from dictionary ID
 def getWord(d, i):
     return list(d.keys())[list(d.values()).index(i)]
-    
-# see prediction vs actual sentence
-def showResult(x, ya, yp, d):
-    s = ""
-    for i in range(len(x)):
-        s += getWord(d, x[i]) + " "
-    
-    s1 = s + " " + getWord(d, yp)
-    s2 = s + " " + getWord(d, ya)
-    
-    print("Actual: ", s2, "\nPredicted: ", s1, "\n")
-
-def showResults(x, ya, yp, i, d):
-    showResult(x[i], ya[i], yp[i], d)
- 
-# see other predicted words
-def showOptions(x, ya, yp, n, d, p, i):
-    showResult(x[i], ya[i], yp[i], d)
-    print("Prediction ideas:")
-    
-    ps = -np.sort(-p[i])
-    pa = np.abs(-np.argsort(-p[i]))
-    
-    for j in range(n):
-        print(j + 1, ". ", getWord(d, pa[j]), " (", round(ps[j] * 100, 2), "%)", sep = '')
 
 def generateSecret(length, size):
     secret = ""
@@ -326,39 +282,12 @@ def generateSecret(length, size):
     
     return secret[:-1]
 
-def discoverSecret(x, m, gs, i, sl):
-    
-    secret = ""
-    
-    xn = np.zeros((sl, gs), dtype = float)
-    for j in range(sl):
-        for k in range(gs):
-            xn[j][k] = x[i][k]
-
-    p0 = m.predict_classes(xn)
-    
-    for j in range(sl):
-        secret += str(p0[0]) + " "
-        for j in range(sl):
-            for k in range(gs - 1):
-                xn[j][k] = xn[j][k + 1]
-          
-        xn[:, gs -1] = p0
-        
-        p0 = m.predict_classes(xn)
- 
-    return secret
-
-def comboString(i):
-    return str(i)
-    
-
 def enumerateSecrets(length, size, rid, pref):
     d = []
     
     if length == 1:
         for i in range(size):
-            a = pref + comboString(i)
+            a = pref + str(i)
             d.append({'id' : rid,
                       'text' : a,
                       'noPunc' : a,
@@ -367,55 +296,26 @@ def enumerateSecrets(length, size, rid, pref):
     
     if length == 2:
         for i in range(size):
-            a = pref + comboString(i)
+            a = pref + str(i)
             for j in range(size):
-                b = a + " " + comboString(j)
+                b = a + " " + str(j)
                 d.append({'id' : rid,
                           'text' : b,
                           'noPunc' : b,
                           'splchk' : b})
                 rid += 1
-                
-    if length == 3:
-        for i in range(size):
-            a = pref + comboString(i)
-            for j in range(size):
-                b = a + " " + comboString(j)
-                for k in range(size):
-                    c = b + " " + comboString(k)
-                    d.append({'id' : rid,
-                              'text' : c,
-                              'noPunc' : c,
-                              'splchk' : c})
-                    rid += 3             
-    
-    if length == 4:
-        for i in range(size):
-            a = pref + comboString(i)
-            for j in range(size):
-                b = a + " " + comboString(j)
-                for k in range(size):
-                    c = b + " " + comboString(k)
-                    for q in range(size):
-                        d = c + " " + comboString(q)
-                        d.append({'id' : rid,
-                                  'text' : d,
-                                  'noPunc' : d,
-                                  'splchk' : d})
-                        rid += 1                    
-    return d, rid
 
-def numericProbs(x, size, d, gs, m, i ): 
-    xn = np.zeros((1, gs), dtype = float)
-    for k in range(gs):
-        xn[0][k] = x[i][k]
+def numericProbs(x, size, dictionary, gramSize, model, index): 
+    xn = np.zeros((1, gramSize), dtype = float)
+    for k in range(gramSize):
+        xn[0][k] = x[index][k]
 
-    p0 = m.predict(xn)[0]
+    p0 = model.predict(xn)[0]
     
     numericProbs = np.zeros((size), dtype = float)
     
     for j in range(size):
-        a = comboString(j)
-        numericProbs[j] = p0[d[a]]
+        a = str(j)
+        numericProbs[j] = p0[dictionary[a]]
         
     return numericProbs
