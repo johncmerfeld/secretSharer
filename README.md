@@ -21,5 +21,6 @@ ______________________________________________________________________
 ```
 
 ## Differences from Carlini paper
+There are two primary differences between this code and the procedure described in the [2018 Carlini et al. paper](https://arxiv.org/abs/1802.08232). 
 
 ## Code walkthrough
