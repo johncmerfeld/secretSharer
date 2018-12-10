@@ -29,7 +29,7 @@ The second difference was in how we estimated exposure. Due to technical constra
 
 ## Code walkthrough
 
-We will not explain every single line of code, but will try to elaborate on comments in the code so that the experiments can be more easily reproduced. We are primarily concerned with the secretSharerExp.py file and its utility library, secretUtils.py. Other utility functions that were used during development but not in the actual tests are located in extraUtils.py.
+We will not explain every single line of code (i.e. you will not get correct results if you simply copy and paste the code snippets from this file), but will try to elaborate on comments in the code so that the experiments can be more easily reproduced. We are primarily concerned with the secretSharerExp.py file and its utility library, secretUtils.py. Other utility functions that were used during development but not in the actual tests are located in extraUtils.py.
 
 ### 0. Experimental setup
 
@@ -80,3 +80,224 @@ dataRaw = pd.DataFrame(d)
 `root` is a large, nested object containing the message data. We structure that data with python's xml package and its `ElementTree` method. We then create a blank list, iterate through every value of `root`'s `text` attribute, and add it to the list. We then add strings of numbers to the list to ensure that they will appear in the dictionary (for potential secret values) even if they are not in the corpus. Finally, the text objects are saved as a Pandas DataFrame.
 
 ### 2. Clean data
+
+We create new columns in our DataFrame to save cleaner versions of the text. It must be scrubbed of unhelpful punctuation and non-standard spellings.
+```
+myPunc = '!"#$%&\()*+-/:;<=>?@[\\]^_`{|}~\''
+dataRaw['noPunc'] = dataRaw['text'].apply(
+        lambda s: s.translate(str.maketrans('','', myPunc)).lower()
+        )
+
+dataRaw['splchk'] = dataRaw['noPunc'].apply(cleanSMS)
+```
+
+We define a list of punctuation characters to be removed by the `apply()` function. Then, the final column ("spellcheck") is created by applying the `cleanSMS()` utility function. It is worth reading some of the source code of this function, as it contains over 200 regular expression commands for standardizing the language of the corpus.
+
+```
+mskTrain = np.random.rand(len(dataRaw)) < 0.8
+dataRawR = dataRaw[mskTrain]
+dataRawT = dataRaw[~mskTrain]
+
+mskVal = np.random.rand(len(dataRawR)) < 0.8
+dataRawV = dataRawR[~mskVal]
+dataRawR = dataRawR[mskVal]
+```
+We then select 20% of the rows to be set aside as a test set and 20% of what remains as a validation set to monitor the training process. The remaining 64% of records are for training the. The reason this partitioning happens so early is so that we can insert the secret into the training set deliberately and before the messages are split into 5-grams.
+
+```
+d, rootId = enumerateSecrets(secretLength, numDistinctValues, rootId, secretPref)
+
+if numFalseSecrets > 0:
+    noise = [d[i] for i in sorted(random.sample(range(len(d)), numFalseSecrets))]
+    noiseDF = pd.DataFrame(noise)
+
+testSecret = pd.DataFrame(d);
+dataRawT = dataRawT.append(d)
+
+d = []
+for i in range(numTrueSecrets):
+    d.append({'id' : rootId,
+              'text' : insertedSecret,
+              'noPunc' : insertedSecret,
+              'splchk' : insertedSecret})
+    rootId += 1
+
+trainSecret = pd.DataFrame(d)
+dataRawR = dataRawR.append(d)
+if numFalseSecrets > 0:
+    dataRawR = dataRawR.append(noiseDF)
+```
+
+The `enumerateSecrets()` utility function allows us to add every secret permutation to the "test" data set, allowing us to see what probability the model assigns to every value of `r`. We also see in this step how `numTrueSecrets` instances of `s[r]` are added to the training data, along with the noisy `s[r']`.
+
+```
+d = []
+gid = 0
+for i in range(len(dataRawR)):
+    grams = ngrams(dataRawR.splchk.iloc[i].split(), gramSize)
+    for g in grams:
+        d.append({'id' : gid,
+                  'data' : g})   
+        gid += 1
+
+dataGramsR = pd.DataFrame(d)
+```
+
+Here, the ngrams package is used to create new 5-word tuples as the data entires. WHen the model is trained, the first four words will act as the data, and the final one will be the label. This is repeated for the testing and validation sets.
+
+### 3. Create dictionary
+
+First, we create two dictionaries, with words as keys. The first has unique numeric IDs, the second counts word frequencies.
+
+```
+dct = dict()
+dctFreq = dict()
+
+did = 0
+for i in range(len(dataRaw)):
+    s = dataRaw.splchk.iloc[i].split()
+    for w in s:
+        if w not in dct:
+            dct[w] = did
+            did += 1
+            dctFreq[w] = 1
+        else:
+            dctFreq[w] += 1
+```
+
+Now, we create a third dictionary and load in all the words with a frequency greater than one. This is more effective than simply deleting words form the first dictionary because it lowers the ID values, which will reduce the data size later when we one-hot encode the records.
+
+```
+dctNoSingle = dict()
+did = 0
+for w in list(dct.keys()):
+    if dctFreq[w] != 1:
+        dctNoSingle[w] = did
+        did += 1
+
+dct = dctNoSingle
+
+def noSingleUseWords(tup):
+    for w in tup:
+        if w not in dct:
+            return False
+    return True
+
+dataGramsR = dataGramsR[dataGramsR['data'].apply(noSingleUseWords) == True]
+```
+
+### 4. Transform data
+
+Now that we have our dictionary, we simply replace each word with its numeric value.
+
+```
+def encodeText(tup):
+    code = [None] * len(tup)
+    for i in range(len(tup)):
+        code[i] = dct[tup[i]]  
+    return tuple(code)
+
+dataGramsR['codes'] = dataGramsR['data'].apply(encodeText)
+
+```
+
+All steps are repeated for testing and validation, of course. Now we simply split our strings of numbers into a "data" and "label" portion (`x` and `y`), and reform them as numpy arrays.
+
+```
+dataGramsR['x'] = dataGramsR['codes'].apply(dataSplit)
+dataGramsR['y'] = dataGramsR['codes'].apply(labelSplit)
+
+xr = np.zeros((len(dataGramsR), seqLength), dtype = int)
+yr = np.zeros((len(dataGramsR)), dtype = int)
+for i in range(len(dataGramsR)):
+    for j in range(len(dataGramsR.x.iloc[i])):
+        xr[i][j] = dataGramsR.x.iloc[i][j]
+    yr[i] = dataGramsR.y.iloc[i]
+```
+
+### 5. Train model
+To have the shapes of data correct within the nodes of the model, we must one-hot encode the label array. We do the same for the validation label.
+
+```
+vocabSize = len(dct)
+b = np.zeros((len(yr), vocabSize))
+b[np.arange(len(yr)), yr] = 1
+
+```
+
+We build the model with 5 layers: the initial embedding of the data, two Long Short Term Memory (LSTM) layers with 100 nodes each, and 2 Dense layers to do the multinomial classification on.
+
+When the model is training, the `epochs` parameter refers to how many passes of the data will be performed, and `batch_size` refers to how many records will be run at a time during each pass. A higher batch size and fewer epochs generally mean the model trains faster.
+
+```
+model = Sequential()
+model.add(Embedding(vocabSize, seqLength, input_length = seqLength))
+model.add(LSTM(100, return_sequences = True))
+model.add(LSTM(100))
+model.add(Dense(100, activation = 'relu'))
+model.add(Dense(vocabSize, activation = 'softmax'))
+
+model.compile(loss = 'categorical_crossentropy', optimizer = 'adam',
+              metrics = ['accuracy'])
+
+history = model.fit(xr, b, batch_size = batchSize, epochs = numEpochs, verbose = True,
+                    validation_data = (xv, bv))
+
+```
+
+### 6. Calculate exposure
+
+Now, we feed the prefix and every possible first (of two) entries for the secret. That way, we get probabilities for each first secret entry, and conditional probabilities for the entire secret. The `numericProbs()` utility function is used here; it returns an array of the model's scores of every entry in the dictionary that represents a number in the randomness space.
+
+```
+start = len(xt) - secretLength * (numDistinctValues ** secretLength)
+
+p0 = np.ones((numDistinctValues, numDistinctValues), dtype = float)
+for i in range(start, len(xt), 2 * numDistinctValues):
+    k = int((i-start) / (2 * numDistinctValues))
+    p0[k] = numericProbs(xt, numDistinctValues, dct, seqLength, model, i)
+    p1 = numericProbs(xt, numDistinctValues, dct, seqLength, model, i + 1)
+    p0[k] = p0[k][k] * p1
+
+scoresRaw = np.argsort(p0, None)[::-1]
+
+```
+
+Once we have scores for every secret, we calculate their rank and exposure as defined in the report, then append the exposure, along with the experimental parameters, to our analysis file.
+
+```
+d = []
+for i in range(len(scoresRaw)):
+    d.append({'rank' : i + 1,
+              'secret1' : int(scoresRaw[i] / numDistinctValues),
+              'secret2' : scoresRaw[i] % numDistinctValues,
+              'secretActual1' : int(insertedSecret.split()[-2]),
+              'secretActual2' : int(insertedSecret.split()[-1])})
+
+secretRanks = pd.DataFrame(d)
+secretMatch1 = secretRanks[secretRanks.secret1 == secretRanks.secretActual1]
+secretMatch2 = int(secretMatch1[secretMatch1.secret2 == secretMatch1.secretActual2]['rank'])
+
+exposure = log(bigR, 2) - log(secretMatch, 2)
+d = []
+d.append({'numEpochs' : numEpochs,
+          'batchSize' : batchSize,
+          'numTrueSecrets' : numTrueSecrets,
+          'numFalseSecrets' : numFalseSecrets,
+          'randomnessSpace' : numDistinctValues,
+          'secretPrefixLength' : seqLength,
+          'secretType' : secretPref,
+          'exposure': exposure})
+
+results = pd.DataFrame(d)
+
+fileName = "experimentalResults.csv"
+if not os.path.isfile(fileName):
+   results.to_csv(fileName, sep = ',', index = False)
+else:
+   results.to_csv(fileName, mode = 'a', sep = ',', header = False, index = False)
+
+```
+And that's it! This script was run over 100 times to generate the data for the report; over 2 full days on a Mac CPU.
+
+Ideally, the code would accommodate more complicated secrets, especially those beyond the numeric space. But at least in this iteration, there simply wasn't time to figure out the technical details on that front for this iteration.
