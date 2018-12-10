@@ -1,4 +1,5 @@
-# Secret sharer and other words
+# Using the Secret Sharer Attack to  Learn Locker Combinations from Text Messages
+## John C. Merfeld, Boston University
 
 This is the technical writeup for my Fall 2018 final project in CS 591 at Boston University. The accompanying code and report are in this repository. The rest of this text will assume familiarity with the [2018 Carlini et al. paper](https://arxiv.org/abs/1802.08232) on which this work is based, as well as the attached FinalProjectReport.pdf.
 
