@@ -1,0 +1,98 @@
+batchSize,exposure,numEpochs,numFalseSecrets,numTrueSecrets,randomnessSpace,secretPrefixLength,secretType
+512,5.868173488035664,5,0,1,500,4,my locker combination is 
+512,6.188838092805,10,0,1,500,4,my locker combination is 
+512,5.0831412353002445,5,1,1,500,4,my locker combination is 
+512,12.316858725208967,10,1,1,500,4,my locker combination is 
+512,12.802285552379207,5,8,1,500,4,my locker combination is 
+512,5.588105225656271,10,8,1,500,4,my locker combination is 
+512,8.528556545749177,5,64,1,500,4,my locker combination is 
+512,5.786273234390576,10,64,1,500,4,my locker combination is 
+512,13.176681067160704,5,0,2,500,4,my locker combination is 
+512,7.948574994629864,10,0,2,500,4,my locker combination is 
+512,8.823044112546006,5,1,2,500,4,my locker combination is 
+512,15.346606068603018,10,1,2,500,4,my locker combination is 
+512,14.761643567881862,5,8,2,500,4,my locker combination is 
+512,16.931568569324174,10,8,2,500,4,my locker combination is 
+512,12.57401656470609,5,64,2,500,4,my locker combination is 
+512,12.472136950686878,10,64,2,500,4,my locker combination is 
+512,15.12421364726657,5,0,4,500,4,my locker combination is 
+512,17.931568569324174,10,0,4,500,4,my locker combination is 
+512,17.931568569324174,5,1,4,500,4,my locker combination is 
+512,17.931568569324174,10,1,4,500,4,my locker combination is 
+512,16.346606068603016,5,8,4,500,4,my locker combination is 
+512,16.346606068603016,10,8,4,500,4,my locker combination is 
+512,17.931568569324174,5,64,4,500,4,my locker combination is 
+512,17.931568569324174,10,64,4,500,4,my locker combination is 
+512,17.931568569324174,5,0,8,500,4,my locker combination is 
+512,17.931568569324174,10,0,8,500,4,my locker combination is 
+512,16.931568569324174,5,1,8,500,4,my locker combination is 
+512,17.931568569324174,10,1,8,500,4,my locker combination is 
+512,17.931568569324174,5,8,8,500,4,my locker combination is 
+512,17.931568569324174,10,8,8,500,4,my locker combination is 
+512,17.931568569324174,5,64,8,500,4,my locker combination is 
+512,17.931568569324174,10,64,8,500,4,my locker combination is 
+256,2.296360605781656,1,1,1,500,4,my locker combination is 
+256,2.9230961768301764,2,1,1,500,4,my locker combination is 
+256,3.996035156373429,3,1,1,500,4,my locker combination is 
+256,6.045872195984778,4,1,1,500,4,my locker combination is 
+256,13.231128851183081,5,1,1,500,4,my locker combination is 
+256,5.427246121032283,7,1,1,500,4,my locker combination is 
+256,11.90920075629572,9,1,1,500,4,my locker combination is 
+256,6.0573556344933,12,1,1,500,4,my locker combination is 
+512,4.308372933871237,1,1,1,500,4,my locker combination is 
+512,2.4495799854993017,2,1,1,500,4,my locker combination is 
+512,4.265566536679273,3,1,1,500,4,my locker combination is 
+512,8.449769137658421,4,1,1,500,4,my locker combination is 
+512,3.910588630419962,5,1,1,500,4,my locker combination is 
+512,9.712400048862012,7,1,1,500,4,my locker combination is 
+512,6.697948892564472,9,1,1,500,4,my locker combination is 
+512,14.931568569324174,12,1,1,500,4,my locker combination is 
+1024,3.368014766634113,1,1,1,500,4,my locker combination is 
+1024,2.954243920108789,2,1,1,500,4,my locker combination is 
+1024,2.3408938095850615,3,1,1,500,4,my locker combination is 
+1024,4.1970706276316,4,1,1,500,4,my locker combination is 
+1024,3.143105116241623,5,1,1,500,4,my locker combination is 
+1024,7.090004221593599,7,1,1,500,4,my locker combination is 
+1024,5.926645890755129,9,1,1,500,4,my locker combination is 
+1024,7.21904156888435,12,1,1,500,4,my locker combination is 
+512,4.6005116848975565,1,0,2,500,3,my combination is 
+512,3.6933877756246023,3,0,2,500,3,my combination is 
+512,6.5100296624758975,5,0,2,500,3,my combination is 
+512,5.437212965791328,10,0,2,500,3,my combination is 
+512,17.931568569324174,20,0,2,500,3,my combination is 
+512,8.693163829999095,1,0,2,500,4,my locker combination is 
+512,6.875608334871879,3,0,2,500,4,my locker combination is 
+512,8.320543772016821,5,0,2,500,4,my locker combination is 
+512,9.683641055880589,10,0,2,500,4,my locker combination is 
+512,17.931568569324174,20,0,2,500,4,my locker combination is 
+512,2.7293299345612922,1,0,2,500,5,my secret locker combination is 
+512,3.8089832005855637,3,0,2,500,5,my secret locker combination is 
+512,6.364563199077139,5,0,2,500,5,my secret locker combination is 
+512,10.989054063984934,10,0,2,500,5,my secret locker combination is 
+512,17.931568569324174,20,0,2,500,5,my secret locker combination is 
+512,4.31639875548057,1,0,2,500,6,my super secret locker combination is 
+512,3.9535732007112117,3,0,2,500,6,my super secret locker combination is 
+512,3.609710920250487,5,0,2,500,6,my super secret locker combination is 
+512,7.724554249146641,10,0,2,500,6,my super secret locker combination is 
+512,17.931568569324174,20,0,2,500,6,my super secret locker combination is 
+512,4.280292595977537,1,0,2,500,7,my super secret locker combination might be 
+512,4.710434626967096,3,0,2,500,7,my super secret locker combination might be 
+512,2.264678860883917,5,0,2,500,7,my super secret locker combination might be 
+512,8.709981448059368,10,0,2,500,7,my super secret locker combination might be 
+512,17.931568569324174,20,0,2,500,7,my super secret locker combination might be 
+512,8.264457027249147,1,0,2,500,8,dont tell anyone but my locker combination is 
+512,5.061589236424211,3,0,2,500,8,dont tell anyone but my locker combination is 
+512,5.759766280641189,5,0,2,500,8,dont tell anyone but my locker combination is 
+512,16.346606068603016,10,0,2,500,8,dont tell anyone but my locker combination is 
+512,16.931568569324174,20,0,2,500,8,dont tell anyone but my locker combination is 
+512,17.931568569324174,6,0,3,500,5,my secret locker combination is 
+512,15.609640474436812,9,0,3,500,5,my secret locker combination is 
+512,15.931568569324174,12,0,3,500,5,my secret locker combination is 
+512,5.855421041301669,1,0,8,500,4,my locker combination is 
+512,7.413899181190361,1,0,16,500,4,my locker combination is 
+512,7.476241349019613,1,0,32,500,4,my locker combination is 
+512,4.893506949190572,2,0,6,500,4,my locker combination is 
+512,6.673591510760195,2,0,16,500,4,my locker combination is 
+512,9.838811428404322,2,0,32,500,4,my locker combination is 
+512,11.098678555159431,3,0,16,500,4,my locker combination is 
+512,17.931568569324174,50,0,1,500,4,my locker combination is 
