@@ -3,8 +3,29 @@
 library(ggplot2)
 library(data.table)
 library(sqldf)
+library(reshape2)
 
 data <- fread("experimentalResults.csv")
+trainAcc <- fread("trainAcc.csv")
+valAcc <- fread("valAcc.csv")
+accDF <- data.frame(tr = trainAcc,
+                    val = valAcc)
+accDF$ID <- seq.int(nrow(accDF))
+names(accDF) <- c("training", "validation", "ID")
+
+mdf <- melt(accDF, id = "ID")
+
+ggplot(mdf,
+       aes(ID,
+           value,
+           color = variable)) +
+  geom_point(alpha = 0.7,
+             size = 4) +
+  labs(title = "Serious overfitting begins around epoch 15",
+       x = "Training epoch",
+       y = "% of words predicted correctly",
+       color = "Metric")
+  scale_x_log10()
 
 # cast as relative exposure
 data$exposure = data$exposure / log(data$randomnessSpace^2, 2)
