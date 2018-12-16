@@ -321,3 +321,14 @@ if not os.path.isfile(fileName):
    results.to_csv(fileName, sep = ',', index = False)
 else: # else it exists so append without writing the header
    results.to_csv(fileName, mode = 'a', sep = ',', header = False, index = False)
+"""
+h = history.history
+h1 = h['acc']
+h2 = h['val_acc']
+
+h1df = pd.DataFrame(h1)
+h2df = pd.DataFrame(h2)
+
+h1df.to_csv("trainAcc.csv", sep = ",", index = False)
+h2df.to_csv("valAcc.csv", sep = ",", index = False)
+"""

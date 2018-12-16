@@ -304,6 +304,8 @@ def enumerateSecrets(length, size, rid, pref):
                           'noPunc' : b,
                           'splchk' : b})
                 rid += 1
+                
+    return d, rid
 
 def numericProbs(x, size, dictionary, gramSize, model, index): 
     xn = np.zeros((1, gramSize), dtype = float)

@@ -6,6 +6,9 @@ library(sqldf)
 library(reshape2)
 
 data <- fread("experimentalResults.csv")
+# cast as relative exposure
+data$exposure = data$exposure / log(data$randomnessSpace^2, 2)
+
 trainAcc <- fread("trainAcc.csv")
 valAcc <- fread("valAcc.csv")
 accDF <- data.frame(tr = trainAcc,
@@ -27,10 +30,7 @@ ggplot(mdf,
        color = "Metric")
   scale_x_log10()
 
-# cast as relative exposure
-data$exposure = data$exposure / log(data$randomnessSpace^2, 2)
-
-ggplot(data,
+ggplot(data[data$numTrueSecrets == 1],
        aes(x = numEpochs,
            y = exposure,
           color = as.factor(batchSize))) + 
@@ -41,7 +41,9 @@ ggplot(data,
   labs(title = "The number of training epochs had the only unambiguous effect on exposure",
        x = "Training epochs (log10)",
        y = "Relative exposure",
-       color = "Batch size")
+       color = "Batch size") +
+  scale_color_brewer(palette = "Spectral") +
+  geom_smooth(method = "lm")
 
 
 ggplot(data[data$numTrueSecrets < 10],
@@ -159,3 +161,14 @@ SELECT
       GROUP BY batchSize
       ORDER BY batchSize
       ")
+
+
+data2 <- data[data$randomnessSpace == 100]
+data2 <- data2[, c("batchSize", "numEpochs", "exposure"), with = F]
+
+ggplot(data2,
+       aes(x = numEpochs,
+           y = exposure,
+           color = as.factor(batchSize))) +
+  geom_point(size = 4) + 
+  geom_line()
