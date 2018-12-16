@@ -35,14 +35,14 @@ ggplot(data[data$numTrueSecrets == 1],
            y = exposure,
           color = as.factor(batchSize))) + 
   geom_point(size = 4,
-             position = position_jitter(width = 0.05, height = 0.01),#, height = 0.1),
+             position = position_jitter(width = 0.01, height = 0.01),#, height = 0.1),
              alpha = 0.6) + 
   scale_x_log10() +
   labs(title = "The number of training epochs had the only unambiguous effect on exposure",
-       x = "Training epochs (log10)",
+       x = "Training epochs (log10 scale)",
        y = "Relative exposure",
        color = "Batch size") +
-  scale_color_brewer(palette = "Spectral") +
+  scale_color_brewer(palette = "YlOrRd") +
   geom_smooth(method = "lm")
 
 
@@ -81,7 +81,7 @@ ggplot(data,
   scale_x_log10() +
   scale_y_log10() +
   labs(title = "At their extremes, training epochs and inserted secrets can make up for one another",
-       x = "Training epochs (log10)",
+       x = "Training epochs (log10 scale)",
        y = "Copies of secret inserted (log10)",
        color = "Relative exposure")
 
